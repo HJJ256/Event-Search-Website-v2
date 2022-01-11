@@ -1,0 +1,162 @@
+<div *ngIf="sharedDataService.eventDetails.Event!=={} && !isEmpty()" class="card mx-lg-5 border-0">
+    <div class="text-center">
+        <h3><b>{{sharedDataService.eventDetails.Event.Event}}</b></h3>
+    </div>
+    <div>        
+        <button class="btn btn-light btn-sm mb-3" style="background-color: transparent; padding: 5px 10px; float: left;"
+        (click)="myRouter.navigate(['/results'])">
+            <span class="material-icons" style="vertical-align:middle;">chevron_left</span>
+            <span style="vertical-align:middle;">List</span>
+        </button>
+
+        <button class="btn btn-light btn-sm" *ngIf="!favoriteServ.existFavoriteElement(sharedDataService.eventDetails.Event)" 
+                        (click)="favoriteServ.insertFavorite(sharedDataService.eventDetails.Event);" [disabled]="sharedDataService.disableStarButton" 
+                        style="background-color: transparent; float: right;">
+            <span class="material-icons-outlined">star_border</span>
+        </button>
+                        
+        <button class="btn btn-light btn-sm" *ngIf="favoriteServ.existFavoriteElement(sharedDataService.eventDetails.Event)" 
+        (click)="favoriteServ.deleteFavorite(sharedDataService.eventDetails.Event);" [disabled]="sharedDataService.disableStarButton"
+        style="background-color: transparent; float: right;">
+            <span class="material-icons" style="color: #FFD531;">star</span>
+        </button>
+        
+        <a class="mx-3"style="float: right;" target="_blank"
+        [href]="'https://twitter.com/intent/tweet?text=Check%20out%20'+sharedDataService.eventDetails.Event.Event.split(' ').join('%20')+'%20located%20at%20'+sharedDataService.eventDetails.Event.Venue.split(' ').join('%20')+'.&hashtags=CSCI571EventSearch'">
+            <img src="../../assets/images/Twitter.png" style="height: 40px; width: 40px;">
+        </a>
+    
+    </div>
+    <div>
+        <ul class="nav nav-tabs card-header-tabs" id='nav-tab' role="tablist">
+            <li class="nav-item ml-auto">
+                <a class="nav-link active" data-toggle="tab" href="#event-details">Event</a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#artist-details">Artist/Teams</a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#venue-details">Venue</a>
+            </li>
+        </ul>
+    </div>
+    <div class="tab-content" id="nav-tabContent">
+        <div class="tab-pane card-body active" id="event-details" role="tabpanel">
+            <table class="table table-striped" id="event_table">
+                <thead></thead>
+                <tbody>
+                    <tr *ngFor="let key of ['Artist','Venue','Date','Category', 'PriceRange', 'Status', 'BTA', 'SeatMap']">
+                        <th scope="row" *ngIf="sharedDataService.eventDetails.Event[key]!=='' && sharedDataService.eventDetails.Event[key]!=='N/A'" style="width: 50%;">
+                            {{eventHeadings[key]}}
+                        </th>
+                        <td style="width: 50%;" *ngIf="key!=='BTA' && key!=='SeatMap' && key!=='Date' && sharedDataService.eventDetails.Event[key]!=='' && sharedDataService.eventDetails.Event[key]!=='N/A'">
+                            {{sharedDataService.eventDetails.Event[key]}}
+                        </td>
+                        <td style="width: 50%;" *ngIf="key==='BTA' && sharedDataService.eventDetails.Event[key]!=='' && sharedDataService.eventDetails.Event[key]!=='N/A'">
+                            <a href="{{sharedDataService.eventDetails.Event[key]}}" target="_blank">Ticketmaster</a>
+                        </td>
+                        <td style="width: 50%;" *ngIf="key==='Date' && sharedDataService.eventDetails.Event[key]!=='' && sharedDataService.eventDetails.Event[key]!=='N/A'">
+                            {{getDate(sharedDataService.eventDetails.Event[key]) | date:'MMM d, y'}}
+                        </td>
+                        <td style="width: 50%;" *ngIf="key==='SeatMap' && sharedDataService.eventDetails.Event[key]!=='' && sharedDataService.eventDetails.Event[key]!=='N/A'">
+                            <a href="#" data-target="#seatModal" data-toggle="modal">View Seat Map Here</a>
+                            <div class="modal fade" id='seatModal' data-backdrop="static" data-keyboard="false" >
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                      <div class="modal-header pb-1">
+                                        <h1 class="modal-title" id="staticBackdropLabel"><b>View Seat Map</b></h1>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                          </button>
+                                      </div>
+                                      <div class="modal-body p-1">
+                                          <img [src]="sharedDataService.eventDetails.Event[key]" alt="Seat Map" style="height: auto; width: 100%;">
+                                      </div>
+                                      <div class="modal-footer p-1">
+                                        <button type="button" class="btn btn-outline-dark" data-dismiss="modal">Close</button>
+                                      </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="tab-pane" id="artist-details" role="tabpanel" *ngIf="Object.keys(sharedDataService.eventDetails.Artist).length !== 0 && sharedDataService.eventDetails.Event.Category.includes('Music') && sharedDataService.eventDetails.Event.Artist !== '' && sharedDataService.eventDetails.Event.Artist !== 'N/A'">    
+            <div class="card-body" *ngFor="let key of Object.keys(sharedDataService.eventDetails.Artist)">
+                <h3 class="card-title text-center"><b>{{key}}</b></h3>
+                <table class="table" *ngIf="Object.keys(sharedDataService.eventDetails.Artist[key]).length !== 0" id="artist_table">
+                    <thead></thead>
+                    <tbody *ngFor="let key1 of ['Name','Followers','Popularity','Check']">
+                        <tr *ngIf="sharedDataService.eventDetails.Artist[key] !== {} && sharedDataService.eventDetails.Artist[key][key1]!=='' && sharedDataService.eventDetails.Artist[key][key1]!=='N/A'">
+                            <th style="width: 50%;" scope="row">
+                                {{artistHeadings[key1]}}
+                            </th>
+                            <td style="width: 50%;" *ngIf="key1!=='Popularity' && key1!=='Check' && key1!=='Followers'">
+                                {{sharedDataService.eventDetails.Artist[key][key1]}}
+                            </td>                            
+                            <td style="width: 50%;" *ngIf="key1==='Followers'">
+                                {{numberWithCommas(sharedDataService.eventDetails.Artist[key][key1])}}
+                            </td>
+                            <td style="width: 50%;" *ngIf="key1==='Popularity'">
+                            <div style="position: relative;width: 80px;height: 80px;">
+                                <div style="position: absolute;top: 50%;left: 0;transform: translateY(-50%);-webkit-transform: translateY(-50%);text-align: center;width: 100%;z-index: 1;">
+                                    {{sharedDataService.eventDetails.Artist[key][key1]}}
+                                </div>
+                                <round-progress [current]="sharedDataService.eventDetails.Artist[key][key1]" [max]="100" [color]="'#82C313'" [radius]="40" 
+                                [rounded]="true" [stroke]="7" [clockwise]='false'>
+                                </round-progress>
+                            </div>
+                            </td>
+                            <td style="width: 50%;" *ngIf="key1 ==='Check'">
+                                <a [href]="sharedDataService.eventDetails.Artist[key][key1]" target="_blank">Spotify</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="card-text text-center" *ngIf="Object.keys(sharedDataService.eventDetails.Artist[key]).length === 0 && key!==''">No Details Available</div>
+            </div>
+        </div>
+        
+        <div class="tab-pane" id="artist-details" role="tabpanel" *ngIf="Object.keys(sharedDataService.eventDetails.Artist).length === 0 || !sharedDataService.eventDetails.Event.Category.includes('Music') || sharedDataService.eventDetails.Event.Artist === ''  || sharedDataService.eventDetails.Event.Artist === 'N/A'">
+            <div class="mx-lg-5 mt-5 alert alert-warning text-center">
+                No Records
+            </div>
+        </div>
+
+        <div class="tab-pane card-body" id="venue-details" role="tabpanel" *ngIf="sharedDataService.eventDetails.Venue!=={} && Object.keys(sharedDataService.eventDetails.Venue).length !== 0">
+            <table class="table">
+                <thead></thead>
+                <tbody>
+                    <tr *ngFor="let key of ['Address','City','Phone','OpenHours', 'GeneralRule', 'ChildRule']">
+                        <th scope="row" *ngIf="sharedDataService.eventDetails.Venue[key]!=='' && sharedDataService.eventDetails.Venue[key]!=='N/A'">
+                            {{venueHeadings[key]}}
+                        </th>
+                        <td *ngIf="sharedDataService.eventDetails.Venue[key]!=='' && sharedDataService.eventDetails.Venue[key]!=='N/A'">
+                            {{sharedDataService.eventDetails.Venue[key]}}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div *ngIf="Object.keys(sharedDataService.eventDetails.Venue['Location']).length==2" style="width: 100%;">
+                <agm-map [zoom]="16" [usePanning]="true" [latitude]="+sharedDataService.eventDetails.Venue['Location']['latitude']" [longitude]="+sharedDataService.eventDetails.Venue['Location']['longitude']" style="height: 400px; width: 100%;">
+                    <agm-marker [latitude]="+sharedDataService.eventDetails.Venue['Location']['latitude']" [longitude]="+sharedDataService.eventDetails.Venue['Location']['longitude']"></agm-marker>
+                </agm-map>
+            </div>
+        </div>
+
+        <div class="tab-pane card-body" id="venue-details" role="tabpanel" 
+        *ngIf="sharedDataService.eventDetails.Venue==={} || Object.keys(sharedDataService.eventDetails.Venue).length === 0">
+            <div class="mx-lg-5 mt-5 alert alert-warning text-center">
+                No Records
+            </div>
+        </div>
+    </div>
+</div>
+
+<div *ngIf="sharedDataService.eventDetails.Event==={} || isEmpty()" class="mx-lg-5 mt-5 alert alert-warning text-center">
+    No Records
+</div>

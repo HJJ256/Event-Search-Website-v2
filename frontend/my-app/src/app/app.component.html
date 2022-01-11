@@ -1,0 +1,116 @@
+<form name= 'userForm' #userForm="ngForm" class="rounded-bottom rounded-top mt-lg-5 mx-lg-5" 
+style="background-color: rgb(245, 245, 245); border: 1px lightgray solid; padding-top: 2%; 
+padding-bottom: 2%;" 
+(ngSubmit)="userForm.form.valid && onSubmit(userForm);">
+      <div class="row mb-1" style="margin: auto;">
+          <h3 style="text-align: center; width: 100%;"><b>Entertainment Event Ticket Search</b></h3>
+      </div>
+      <div class="row mb-3" style="margin: auto;">
+          <div class="col-sm-1"></div>
+          <label for="Keyword" class="col-sm-2 col-form-label">Keyword <span style="color: red;">*</span></label>
+          <div class="col-sm-6">
+              <input type="text" class="form-control" name="Keyword" id="Keyword" [(ngModel)]="model.Keyword" #Keyword="ngModel" 
+              placeholder="Enter Artist, Team or Event Name (eg. Lakers)" [ngClass] = "{'is-invalid': emptyKeywordField() && !focusKeyword}" 
+              (blur) = "focusKeyword = false" required autofocus (keyup)="doAutocomplete()" [matAutocomplete]="auto">
+              <mat-autocomplete #auto="matAutocomplete">
+                <mat-option *ngFor="let option of autocompleteOpts" [value]="option">
+                  {{option}}
+                </mat-option>
+              </mat-autocomplete>
+              <div class="invalid-feedback" *ngIf="emptyKeywordField() && !focusKeyword">
+                <p *ngIf="emptyKeywordField()">Please enter a keyword.</p>
+              </div>
+          </div>
+      </div>
+      <div class="row mb-3" style="margin: auto;">
+          <div class="col-sm-1"></div>
+          <label for="Category" class="col-sm-2 col-form-label">Category</label>
+          <div class="col-sm-2">
+              <select class="form-control" name="Category" id="Category" [(ngModel)]="model.segmentId">
+                  <option value="">All</option>
+                  <option value='KZFzniwnSyZfZ7v7nJ'>Music</option>
+                  <option value='KZFzniwnSyZfZ7v7nE'>Sports</option>
+                  <option value='KZFzniwnSyZfZ7v7na'>Arts & Theatre</option>
+                  <option value='KZFzniwnSyZfZ7v7nn'>Film</option>
+                  <option value='KZFzniwnSyZfZ7v7n1'>Miscellaneous</option>
+              </select>
+          </div>
+      </div>
+      <div class="row mb-3" style="margin: auto;">
+          <div class="col-sm-1"></div>
+          <label for="Distance" class="col-sm-2 col-form-label">Distance</label>
+          <div class="col-sm-2">
+              <input type="number" min="0" class="form-control" name="Distance" id="Distance" [(ngModel)]="model.Distance" placeholder="10">
+          </div>
+          <div class="col-sm-2">
+              <select class="form-control" name="Unit" id="Unit" placeholder="10" [(ngModel)]="model.Unit">
+                  <option value="miles">Miles</option>
+                  <option value="km">Kilometers</option>
+              </select>
+          </div>
+      </div>
+      
+      <div class="row mb-3" style="margin: auto;">
+          <div class="col-sm-1"></div>
+          <label for="From" class="col-sm-2 col-form-label">From <span style="color: red;">*</span></label>
+          <div class="col-sm-6">
+              <div class='form-check'>
+                  <input type="radio" (click)="toggleLocation(true)" class="form-check-input" name="From" id="Here" value="Here" [checked]='locationDisabled'>
+                  <label for="Here" class="form-check-label">
+                      Current Location
+                  </label>
+                  <br>
+                  <input type="radio" (click)="toggleLocation(false)" class="form-check-input" name="From" id="Loc" value="Loc">
+                  <label for="Loc" class="form-check-label">
+                      Other, Please specify:
+                  </label>
+                  <br>
+                  <input type="text" class="form-control" id="Location"  name="Location"
+                  [(ngModel)] = "model.Location" #Location="ngModel" 
+                  [ngClass] = "{'is-invalid':emptyLocationField() && !focusLocation && !locationDisabled}" [disabled]="locationDisabled" 
+                  (blur) = "focusLocation = false;" required>
+                  <div class="invalid-feedback" *ngIf="emptyLocationField() && !focusLocation && !locationDisabled">
+                    <p *ngIf="emptyLocationField();">Please enter a location.</p>
+                  </div>
+              </div>
+              
+          </div>
+      </div>
+      <div class="row mb-3" style="margin: auto;">
+          <div class="col-sm-1"></div>
+          <div class="col-sm-3">
+              <button id = "Search" type="submit" class="btn btn-primary btn-sm" style="padding: 5px 10px" 
+              [disabled]="model.Keyword.trim()==='' || model.LatLong==='' || (model.Location==='' && !locationDisabled)">
+                  <span class="material-icons" style="vertical-align:middle;">search</span>
+                  <span style="vertical-align:middle;">Search</span>
+              </button>
+              <button type="button" id="Clear" class="btn btn-light btn-sm" style="background-color: white; padding: 5px 10px; margin-left: 2px;"
+              (click)="resetPage(userForm)">
+                  <span class="material-icons" style="vertical-align:middle;">clear_all</span>
+                  <span style="vertical-align:middle;">Clear</span>
+              </button>
+          </div>
+      </div>
+</form>
+<br>
+<div style="margin:auto; width:80%;text-align: center;">
+  <div class = 'btn-group btn-group-toggle' data-toggle="buttons">
+      <label for='Results' [ngClass]="sharedDataService.selectedEvent?'btn btn-outline-primary active':'btn btn-outline-primary'">
+        <input type="radio" id='Results' name='result_tab' (click)="sharedDataService.selectedEvent=true; myRouter.navigate(['/results']);" 
+        [checked]='sharedDataService.selectedEvent'>
+          Results
+      </label>
+      <label for='Favorites' [ngClass]="!sharedDataService.selectedEvent?'btn btn-outline-primary active':'btn btn-outline-primary'">
+        <input type="radio" id='Favorites' name='result_tab' (click)="sharedDataService.selectedEvent=false; myRouter.navigate(['/results']);">
+          Favorites
+      </label>
+  </div>
+</div>
+<br>
+<div class="progress" *ngIf="showProgressBar">
+  <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" style="width: 50%"></div>
+</div>
+
+<main [@routeAnimations]="prepareRoute(outlet)" class="content">
+  <router-outlet #outlet="outlet"></router-outlet>
+</main>

@@ -1,0 +1,92 @@
+<div class="alert alert-warning mx-lg-5 text-center" 
+*ngIf="sharedDataService.selectedEvent && sharedDataService.eventArray.length === 0 && sharedDataService.showNoResults">
+    No Records
+</div>
+
+<div class="alert alert-danger mx-lg-5 text-center" 
+*ngIf="sharedDataService.selectedEvent && sharedDataService.eventArray.length === 0 && sharedDataService.showError">
+    Failed to get search results.
+</div>
+
+<div *ngIf="sharedDataService.selectedEvent && sharedDataService.eventArray.length !== 0" class="mx-lg-5">
+    <button class="btn btn-light btn-sm mb-3" style="background-color: transparent; padding: 5px 10px; float: right;"
+    [disabled]="sharedDataService.disableDetailsButton" (click)="myRouter.navigate(['/details'])">
+        <span style="vertical-align:middle;">Details</span>
+        <span class="material-icons" style="vertical-align:middle;">chevron_right</span>
+    </button>
+    <table class="table table-hover">
+        <thead style="border-bottom: 3px solid black;">
+            <th>#</th>
+            <th>Date</th>
+            <th>Event</th>
+            <th>Category</th>
+            <th>Venue Info</th>
+            <th>Favorite</th>
+        </thead>
+        <tbody>
+            <tr *ngFor="let e of sharedDataService.eventArray; let indexOfEvent = index">
+                <td>{{indexOfEvent+1}}</td>
+                <td>{{e["Date"]}}</td>
+                <td><a onmouseover="this.style.cursor='pointer'" [id]='e["id"]' [matTooltip]='e["Event"]' (click)="doEventDetailsFetch(e['id'])">
+                    {{e["Event"].length > 35 ? e["Event"].substring(0,e["Event"].substring(0,36).lastIndexOf(' ')!==-1?e["Event"].substring(0,36).lastIndexOf(' '):36) + '...' : e["Event"]}}
+                </a></td>
+                <td>{{e["Category"]}}</td>
+                <td>{{e["Venue"]}}</td>
+                <td>
+                    <button class="btn btn-light btn-sm" *ngIf="!favoriteServ.existFavoriteElement(e)" 
+                    (click)="favoriteServ.insertFavorite(e);" 
+                    style="background-color: transparent; border: transparent;">
+                        <span class="material-icons-outlined">star_border</span>
+                    </button>
+                    
+                    <button class="btn btn-light btn-sm" *ngIf="favoriteServ.existFavoriteElement(e)" 
+                    (click)="favoriteServ.deleteFavorite(e);" 
+                    style="background-color: transparent; border: transparent;">
+                        <span class="material-icons" style="color: #FFD531;">star</span>
+                    </button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+
+<div class="alert alert-warning mx-lg-5 text-center" *ngIf="!sharedDataService.selectedEvent && favoriteServ.getFavorites().length === 0">
+    No Records
+</div>
+
+<div *ngIf="!sharedDataService.selectedEvent && favoriteServ.getFavorites().length !== 0">
+    <button class="btn btn-light btn-sm mb-3" style="background-color: transparent; padding: 5px 10px; float: right;"
+    [disabled]="sharedDataService.disableDetailsButton" (click)="myRouter.navigate(['/details'])">
+        <span style="vertical-align:middle;">Details</span>
+        <span class="material-icons" style="vertical-align:middle;">chevron_right</span>
+    </button>
+    <table class="table table-hover">
+        <thead>
+            <th>#</th>
+            <th>Date</th>
+            <th>Event</th>
+            <th>Category</th>
+            <th>Venue Info</th>
+            <th>Favorite</th>
+        </thead>
+        <tbody>
+            <tr *ngFor="let e of favoriteServ.getFavorites(); let indexOfEvent = index">
+                <td>{{indexOfEvent+1}}</td>
+                <td>{{e["Date"]}}</td>
+                <td><a onmouseover="this.style.cursor='pointer'" [id]='e["id"]' [matTooltip]='e["Event"]' (click)="doEventDetailsFetch(e['id']);">
+                    {{e["Event"].length > 35 ? e["Event"].substring(0,e["Event"].substring(0,36).lastIndexOf(' ')!==-1?e["Event"].substring(0,36).lastIndexOf(' '):36) + '...' : e["Event"]}}
+                </a></td>
+                <td>{{e["Category"]}}</td>
+                <td>{{e["Venue"]}}</td>
+                <td>
+                    <button class="btn btn-light btn-sm" 
+                    (click)="favoriteServ.deleteFavorite(e);" style="background-color: transparent; border: transparent;">
+                        <span class="material-icons">delete</span>
+                    </button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<br>
